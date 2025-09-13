@@ -75,8 +75,11 @@ class ApiService {
     return this.makeRequest(`${this.baseURL}/init-db`, { method: 'POST' });
   }
 }
-
 // Token helpers
+export const setAuthToken = (token: string): void => {
+  localStorage.setItem('authToken', token);
+};
+
 export const getAuthToken = (): string | null => {
   return localStorage.getItem('authToken');
 };
@@ -87,3 +90,4 @@ export const removeAuthToken = (): void => {
 
 // Export a single API object
 export const api = new ApiService();
+
