@@ -1,69 +1,87 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+// src/services/api.ts
+class ApiService {
+  private baseURL: string;
 
-export const api = {
-  // Authentication
-  register: async (userData: { username: string; email: string; password: string }) => {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+  constructor() {
+    // Netlify Functions URL pattern
+    this.baseURL = import.meta.env.PROD 
+      ? '/.netlify/functions' 
+      : 'http://localhost:8888/.netlify/functions';
+  }
+
+  private async makeRequest(url: string, options: RequestInit = {}) {
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // Auth methods
+  async register(userData: { username: string; email: string; password: string }) {
+    return this.makeRequest(`${this.baseURL}/auth/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
     });
-    return response.json();
-  },
+  }
 
-  login: async (credentials: { email: string; password: string }) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+  async login(credentials: { email: string; password: string }) {
+    return this.makeRequest(`${this.baseURL}/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     });
-    return response.json();
-  },
+  }
 
-  // Measurements
-  saveMeasurements: async (measurements: any, token: string) => {
-    const response = await fetch(`${API_BASE_URL}/measurements`, {
+  // Measurements methods
+  async saveMeasurements(measurements: any, token: string) {
+    return this.makeRequest(`${this.baseURL}/measurements`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(measurements),
     });
-    return response.json();
-  },
+  }
 
-  getUserMeasurements: async (token: string) => {
-    const response = await fetch(`${API_BASE_URL}/measurements`, {
+  async getMeasurements(token: string) {
+    return this.makeRequest(`${this.baseURL}/measurements`, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
-    return response.json();
-  },
+  }
 
-  // Recommendations
-  getRecommendations: async (measurements: any, token: string) => {
-    const response = await fetch(`${API_BASE_URL}/recommendations`, {
+  // Recommendations method
+  async getRecommendations(measurements: any, token: string) {
+    return this.makeRequest(`${this.baseURL}/recommendations`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(measurements),
     });
-    return response.json();
-  },
-};
+  }
 
-export const setAuthToken = (token: string) => {
-  localStorage.setItem('authToken', token);
-};
+  // Clothing method
+  async getClothing() {
+    return this.makeRequest(`${this.baseURL}/clothing`);
+  }
 
-export const getAuthToken = () => {
-  return localStorage.getItem('authToken');
-};
+  // Database initialization (for first-time setup)
+  async initializeDatabase() {
+    return this.makeRequest(`${this.baseURL}/init-db`, {
+      method: 'POST',
+    });
+  }
+}
 
-export const removeAuthToken = () => {
-  localStorage.removeItem('authToken');
-};
+export const api = new ApiService();
