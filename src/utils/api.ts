@@ -44,9 +44,7 @@ class ApiService {
   async saveMeasurements(measurements: any, token: string) {
     return this.makeRequest(`${this.baseURL}/measurements`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(measurements),
     });
   }
@@ -54,34 +52,38 @@ class ApiService {
   async getMeasurements(token: string) {
     return this.makeRequest(`${this.baseURL}/measurements`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: { 'Authorization': `Bearer ${token}` },
     });
   }
 
-  // Recommendations method
+  // Recommendations
   async getRecommendations(measurements: any, token: string) {
     return this.makeRequest(`${this.baseURL}/recommendations`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(measurements),
     });
   }
 
-  // Clothing method
+  // Clothing
   async getClothing() {
     return this.makeRequest(`${this.baseURL}/clothing`);
   }
 
-  // Database initialization (for first-time setup)
+  // Database initialization
   async initializeDatabase() {
-    return this.makeRequest(`${this.baseURL}/init-db`, {
-      method: 'POST',
-    });
+    return this.makeRequest(`${this.baseURL}/init-db`, { method: 'POST' });
   }
 }
 
+// Token helpers
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem('authToken');
+};
+
+export const removeAuthToken = (): void => {
+  localStorage.removeItem('authToken');
+};
+
+// Export a single API object
 export const api = new ApiService();
